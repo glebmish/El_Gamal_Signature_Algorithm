@@ -20,10 +20,6 @@
 #include <iostream>
 using namespace std;
 
-const long long P = 104729,
-                G = 7043;
-
-
 // Нужно для нахождения обратного к К числа. Скопипащено.
 long long gcd(long long a, long long b, long long & x, long long & y) {
     if (a == 0) {
@@ -38,7 +34,7 @@ long long gcd(long long a, long long b, long long & x, long long & y) {
 }
 
 // Находит обратное к К число в кольце вычетов (P-1) с помощью расширенного алгоритма Евклида
-long long find_inverse(long long K) {
+long long find_inverse(long long P, long long K) {
     long long a = K,
               b = P - 1,
               x, y;
@@ -71,13 +67,25 @@ long long pow_mod(long long x, long long y, long long m) {
 }
 
 
+long long get_mod() {
+    int P;
+    cin >> P;
+    return P;
+}
+
+long long get_rand_numb() {
+    int G;
+    cin >> G;
+    return G;
+}
+
 long long get_secret_key() {
     long long X;
     cin >> X;
     return X;
 }
 
-long long generate_public_key(long long X) {
+long long generate_public_key(long long P, long long G, long long X) {
     return pow_mod(G, X, P);
 }
 
@@ -92,15 +100,16 @@ long long generate_hash(long long m) {
     return m;
 }
 
-long long generate_session_key() {
-    long long K = 2311;
+long long get_session_key() {
+    long long K;
+    cin >> K;
     return K;
 }
 
 
-Signature generate_signature(long long K, long long M, long long X) {
+Signature generate_signature(long long P, long long G, long long K, long long M, long long X) {
     // K_ это K^-1 - обратно к К число
-    long long K_ = find_inverse(K); 
+    long long K_ = find_inverse(P, K); 
 
     long long a = pow_mod(G, K, P);
     long long b = (M - X * a) * K_ % (P - 1);
@@ -112,7 +121,7 @@ Signature generate_signature(long long K, long long M, long long X) {
     return Signature(a, b);
 }
 
-bool check_signed_message(long long m, Signature S, long long Y) {
+bool check_signed_message(long long P, long long G, long long m, Signature S, long long Y) {
     long long M = generate_hash(m);
 
     long long a = (pow_mod(Y, S.a, P) * pow_mod(S.a, S.b, P)) % P;
@@ -123,29 +132,56 @@ bool check_signed_message(long long m, Signature S, long long Y) {
 
 
 void task_generate_public_key() {
+    cout << "Write mod number\n";
+    long long P = get_mod();
+
+    cout << "Write random number <P\n";
+    long long G = get_rand_numb();
+
     cout << "Write secret key\n";
     long long X = get_secret_key();
 
-    long long Y = generate_public_key(X);
-    cout << "For private key " << X << endl
+    long long Y = generate_public_key(P, G, X);
+    cout << "For mod " << P << endl
+         << "random number " << G << endl
+         << "secret key " << X << endl
          << "Public key is " << Y << endl;
 }
 
 void task_generate_signature() {
+    cout << "Write mod number\n";
+    long long P = get_mod();
+
+    cout << "Write random number <P\n";
+    long long G = get_rand_numb();
+
+    cout << "Write session key\n";
+    long long K = get_session_key();
+
     cout << "Write secret key\n";
     long long X = get_secret_key();
 
     cout << "Write message\n";
     long long m = get_message();
 
-    long long M = generate_hash(m),
-        K = generate_session_key();
-    Signature S = generate_signature(K, M, X);
-    cout << "For private key " << X << " and message " << m << endl
+    long long M = generate_hash(m);
+
+    Signature S = generate_signature(P, G, K, M, X);
+    cout << "For mod " << P << endl
+         << "random number " << G << endl
+         << "secret key " << X << endl
+         << "session key " << K << endl
+         << "message " << m << endl
          << "signature is " << S.a << " " << S.b << endl;
 }
 
 void task_check_signature() {
+    cout << "Write mod number\n";
+    long long P = get_mod();
+
+    cout << "Write random number <P\n";
+    long long G = get_rand_numb();
+
     cout << "Write public key\n";
     long long Y;
     cin >> Y;
@@ -158,7 +194,7 @@ void task_check_signature() {
     Signature S;
     cin >> S.a >> S.b;
 
-    bool check = check_signed_message(m, S, Y);
+    bool check = check_signed_message(P, G, m, S, Y);
     if (check)
         cout << "For message " << m << " signature " << S.a << " " << S.b << " is confirmed\n";
     else
@@ -169,11 +205,6 @@ void task_check_signature() {
 int main() {
     int act = 1;
 
-    cout << "General information:\n"
-         << "P = " << P << endl
-         << "G = " << G << endl
-         << "K = " << 2311 << endl << endl;
-    
     while (act != 0) {
         cout << "Avialable actions are:\n"
              << "1. Generate public key\n"
