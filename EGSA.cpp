@@ -20,7 +20,7 @@
 #include <iostream>
 using namespace std;
 
-// Нужно для нахождения обратного к К числа. Скопипащено.
+// Нужно для нахождения обратного к К числа.
 long long gcd(long long a, long long b, long long & x, long long & y) {
     if (a == 0) {
         x = 0; y = 1;
@@ -114,7 +114,7 @@ Signature generate_signature(long long P, long long G, long long K, long long M,
     long long a = pow_mod(G, K, P);
     long long b = (M - X * a) * K_ % (P - 1);
 
-    // тупой % в c++ может оставить отрицательное число <(P-1)
+    // модуль всегда должен быть положительным
     if (b < 0)
         b += P - 1;
 
@@ -132,36 +132,36 @@ bool check_signed_message(long long P, long long G, long long m, Signature S, lo
 
 
 void task_generate_public_key() {
-    cout << "Write mod number\n";
+    cout << "Write mod number P\n";
     long long P = get_mod();
 
-    cout << "Write random number <P\n";
+    cout << "Write random number G. G < P\n";
     long long G = get_rand_numb();
 
-    cout << "Write secret key\n";
+    cout << "Write secret key X. 1 < X < (P - 1)\n";
     long long X = get_secret_key();
 
     long long Y = generate_public_key(P, G, X);
     cout << "For mod " << P << endl
          << "random number " << G << endl
          << "secret key " << X << endl
-         << "Public key is " << Y << endl;
+         << "Public key Y is " << Y << endl;
 }
 
 void task_generate_signature() {
-    cout << "Write mod number\n";
+    cout << "Write mod number P\n";
     long long P = get_mod();
 
-    cout << "Write random number <P\n";
+    cout << "Write random number G. G < P\n";
     long long G = get_rand_numb();
 
-    cout << "Write session key\n";
+    cout << "Write session key K. 1 < K < (P - 1), K and P-1 are relatively prime\n";
     long long K = get_session_key();
 
-    cout << "Write secret key\n";
+    cout << "Write secret key X. 1 < X < (P - 1)\n";
     long long X = get_secret_key();
 
-    cout << "Write message\n";
+    cout << "Write message M\n";
     long long m = get_message();
 
     long long M = generate_hash(m);
@@ -172,25 +172,25 @@ void task_generate_signature() {
          << "secret key " << X << endl
          << "session key " << K << endl
          << "message " << m << endl
-         << "signature is " << S.a << " " << S.b << endl;
+         << "signature (a, b) is " << S.a << " " << S.b << endl;
 }
 
 void task_check_signature() {
-    cout << "Write mod number\n";
+    cout << "Write mod number P\n";
     long long P = get_mod();
 
-    cout << "Write random number <P\n";
+    cout << "Write random number G. G < P\n";
     long long G = get_rand_numb();
 
-    cout << "Write public key\n";
+    cout << "Write public key Y\n";
     long long Y;
     cin >> Y;
 
-    cout << "Write message\n";
+    cout << "Write message M\n";
     long long m;
     cin >> m;
 
-    cout << "Write signature\n";
+    cout << "Write signature (a, b)\n";
     Signature S;
     cin >> S.a >> S.b;
 
@@ -209,7 +209,8 @@ int main() {
         cout << "Avialable actions are:\n"
              << "1. Generate public key\n"
              << "2. Generate signature\n"
-             << "3. Check signature\n\n"
+             << "3. Check signature\n"
+             << "0. Exit\n\n"
              << "Choose: ";
 
         cin >> act;
